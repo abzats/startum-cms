@@ -1,0 +1,20 @@
+<div class="container h-100">
+  <div class="row h-100">
+    <div class="col-12 pt-3">
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="activeNav === 'prices'" (click)="activeNav = 'prices'"> Prices </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="activeNav === 'schedule'" (click)="activeNav = 'schedule'">
+            Schedule
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div class="col-12">
+      <app-prices *ngIf="activeNav === 'prices'"></app-prices>
+      <app-schedule *ngIf="activeNav === 'schedule'"></app-schedule>
+    </div>
+  </div>
+</div>

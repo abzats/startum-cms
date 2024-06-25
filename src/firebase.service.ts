@@ -1,8 +1,9 @@
 import { Injectable, NgZone } from '@angular/core';
 import { FirebaseApp, initializeApp } from 'firebase/app';
+import { Auth, getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import 'firebase/firestore';
-import { Firestore, collection, getDocs, getFirestore } from 'firebase/firestore';
-import { defaultPrices, defaultSchedule } from './firebase.default-values';
+import { Firestore, QueryDocumentSnapshot, collection, getDocs, getFirestore, updateDoc } from 'firebase/firestore';
+import { defaultSchedule } from './firebase.default-values';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyB6zZYS-HF9oOqJYL5zx3cFxUCHi0vatNs',
@@ -31,10 +32,21 @@ export type ScheduleItem = { time: string; ru: string; en: string; da: string };
 export class FirebaseService {
   app: FirebaseApp;
   db: Firestore;
+  auth: Auth;
 
   constructor(private zone: NgZone) {
     this.app = initializeApp(firebaseConfig);
     this.db = getFirestore(this.app);
+    this.auth = getAuth();
+  }
+
+  async signIn(email: string, password: string): Promise<boolean> {
+    const authResult = await signInWithEmailAndPassword(this.auth, email, password);
+    return !!authResult;
+  }
+
+  async signOut() {
+    return await signOut(this.auth);
   }
 
   async getSchedule(): Promise<ScheduleItem[]> {
@@ -49,7 +61,27 @@ export class FirebaseService {
     });
   }
 
-  async getPrices(): Promise<PriceItem[]> {
+  async setSchedule(schedule: ScheduleItem[]): Promise<boolean> {
+    const querySnapshot = await getDocs<ScheduleItem, any>(collection(this.db, 'schedule') as any).catch(() => {
+      console.error('Cannot connect to DB');
+
+      return undefined;
+    });
+
+    return querySnapshot
+      ? (
+          await Promise.all(
+            querySnapshot.docs.map((item: QueryDocumentSnapshot, index) => {
+              return updateDoc(item.ref, schedule[index])
+                .then(() => true)
+                .catch(() => false);
+            }),
+          )
+        ).indexOf(false) === -1
+      : false;
+  }
+
+  async getPrices(): Promise<PriceItem[] | undefined> {
     return this.zone.runOutsideAngular(async () => {
       const querySnapshot = await getDocs<PriceItem, any>(collection(this.db, 'price') as any).catch(() => {
         console.error('Cannot connect to DB');
@@ -57,19 +89,27 @@ export class FirebaseService {
         return undefined;
       });
 
-      return querySnapshot?.docs.map((item) => item.data()) || defaultPrices;
+      return querySnapshot?.docs.map((item) => item.data());
     });
   }
 
-  // async setPrices() {
-  //   const querySnapshot = await getDocs<PriceItem, any>(collection(this.db, 'price') as any).catch(() => {
-  //     console.error('Cannot connect to DB');
+  async setPrices(prices: PriceItem[]): Promise<boolean> {
+    const querySnapshot = await getDocs<PriceItem, any>(collection(this.db, 'price') as any).catch(() => {
+      console.error('Cannot connect to DB');
 
-  //     return undefined;
-  //   });
+      return undefined;
+    });
 
-  //   querySnapshot?.docs.forEach((item: QueryDocumentSnapshot, index) => {
-  //     updateDoc(item.ref, defaultPrices[index]);
-  //   });
-  // }
+    return querySnapshot
+      ? (
+          await Promise.all(
+            querySnapshot.docs.map((item: QueryDocumentSnapshot, index) => {
+              return updateDoc(item.ref, prices[index])
+                .then(() => true)
+                .catch(() => false);
+            }),
+          )
+        ).indexOf(false) === -1
+      : false;
+  }
 }

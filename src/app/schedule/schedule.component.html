@@ -1,0 +1,62 @@
+<div class="p-4">
+  @if (isLoading) {
+  <div class="d-flex justify-content-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  } @else {
+  <div>
+    <div class="d-flex justify-content-between mb-4">
+      <button class="btn btn-outline-danger" (click)="reset()">Reset to default</button>
+      <button class="btn btn-success mr-0 ml-2" (click)="save()">Save</button>
+    </div>
+  </div>
+  @for (item of items; track $index) {
+  <div class="card mb-4">
+    <div class="card-body">
+      <div
+        class="card-header"
+        [style.backgroundColor]="
+          $index === 0 ? '#3165ae' : $index === 1 ? '#a7cd80' : $index === 2 ? '#96d4e3' : $index === 4 ? '#3c9e36' : '#fff3C6'
+        "
+        [style.color]="$index === 0 || $index === 4 ? 'white' : ''"
+      >
+        <b>{{ $index + 1 }} class</b>
+      </div>
+
+      <div class="row my-4">
+        <div class="col-sm-4">
+          <div class="form-floating">
+            <input type="text" class="form-control" id="mainValue" [(ngModel)]="item.time" />
+            <label for="mainValue">Time</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="form-floating">
+            <textarea rows="7" type="text" class="form-control h-auto" id="textRu" [(ngModel)]="item.ru"></textarea>
+            <label for="textRu">RU</label>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="form-floating">
+            <textarea rows="7" type="text" class="form-control h-auto" id="textEn" [(ngModel)]="item.en"></textarea>
+            <label for="textEn">EN</label>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="form-floating">
+            <textarea rows="7" type="text" class="form-control h-auto" id="textDa" [(ngModel)]="item.da"></textarea>
+            <label for="textDa">DA</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  } }
+</div>

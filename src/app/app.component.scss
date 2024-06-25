@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.nav-link {
+  border: 1px solid transparent;
+
+  &.router-link-active {
+    border-color: rgba(var(--bs-primary-rgb), var(--bs-bg-opacity));
+  }
+}
